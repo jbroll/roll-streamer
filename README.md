@@ -118,7 +118,7 @@ cd firmware/
 
 ### 3. PiCorePlayer Extension Installation
 
-**Note:** PiCorePlayer uses Tiny Core Linux, not systemd. See [PiCorePlayer Installation Guide](docs/PICOREPLAYER_INSTALL.md) for complete instructions.
+See [PiCorePlayer Installation Guide](docs/PICOREPLAYER_INSTALL.md) for complete instructions.
 
 #### Quick Install (on RPi Zero 2)
 
@@ -320,7 +320,7 @@ i2cdetect -y 1
 
 ```bash
 # Check if daemon is running
-systemctl status vu-meter.service
+/opt/roll-streamer/init/check-services.sh
 
 # Test VU meters directly
 python3 /opt/roll-streamer/scripts/vu_meter_daemon.py --test
@@ -337,7 +337,7 @@ i2cset -y 1 0x42 0x21 255  # Right VU to max
 
 ```bash
 # Check input handler is running
-systemctl status input-handler.service
+/opt/roll-streamer/init/check-services.sh
 
 # Test inputs directly
 python3 -c "
