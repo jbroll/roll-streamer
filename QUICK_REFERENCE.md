@@ -129,45 +129,54 @@ with RP2040Controller() as c:
         time.sleep(0.1)
 ```
 
-## Service Management
+## Service Management (PiCorePlayer/Tiny Core)
 
 ### Control Services
 
 ```bash
+# Check status
+/opt/roll-streamer/init/check-services.sh
+
 # Start services
-sudo systemctl start vu-meter.service
-sudo systemctl start input-handler.service
+/opt/roll-streamer/init/start-vu-meter.sh
+/opt/roll-streamer/init/start-input-handler.sh
 
 # Stop services
-sudo systemctl stop vu-meter.service
-sudo systemctl stop input-handler.service
+/opt/roll-streamer/init/stop-services.sh
 
 # Restart services
-sudo systemctl restart vu-meter.service
-sudo systemctl restart input-handler.service
-
-# Check status
-sudo systemctl status vu-meter.service
-sudo systemctl status input-handler.service
-
-# Enable/disable auto-start
-sudo systemctl enable vu-meter.service
-sudo systemctl disable vu-meter.service
+/opt/roll-streamer/init/stop-services.sh
+/opt/roll-streamer/init/start-vu-meter.sh
+/opt/roll-streamer/init/start-input-handler.sh
 ```
 
 ### View Logs
 
 ```bash
 # Follow logs (Ctrl+C to exit)
-journalctl -u vu-meter.service -f
-journalctl -u input-handler.service -f
+tail -f /tmp/vu-meter-daemon.log
+tail -f /tmp/input-handler.log
 
 # View recent logs
-journalctl -u vu-meter.service -n 50
-journalctl -u input-handler.service -n 50
+tail -n 50 /tmp/vu-meter-daemon.log
+tail -n 50 /tmp/input-handler.log
 
-# View errors only
-journalctl -u vu-meter.service -p err
+# View all logs
+cat /tmp/vu-meter-daemon.log
+cat /tmp/input-handler.log
+```
+
+### Persistence (Important for PiCorePlayer!)
+
+```bash
+# Save changes to persist across reboots
+sudo filetool.sh -b
+
+# Check if directory is in persistence list
+grep roll-streamer /opt/.filetool.lst
+
+# Add to persistence if not present
+echo "/opt/roll-streamer" | sudo tee -a /opt/.filetool.lst
 ```
 
 ## Firmware Build
@@ -333,12 +342,19 @@ python3 -c "import smbus2"
 
 # Check file permissions
 ls -l /opt/roll-streamer/scripts/
+ls -l /opt/roll-streamer/init/
 
-# View detailed errors
-journalctl -xe
+# View logs
+tail -n 50 /tmp/vu-meter-daemon.log
+tail -n 50 /tmp/input-handler.log
+
+# Check if running
+/opt/roll-streamer/init/check-services.sh
 
 # Restart services
-sudo systemctl restart vu-meter.service
+/opt/roll-streamer/init/stop-services.sh
+/opt/roll-streamer/init/start-vu-meter.sh
+/opt/roll-streamer/init/start-input-handler.sh
 ```
 
 ### VU Meters Not Responding
@@ -363,14 +379,17 @@ i2cset -y 1 0x42 0x21 255
 | Python library | `/opt/roll-streamer/src/rp2040_controller.py` |
 | VU meter daemon | `/opt/roll-streamer/scripts/vu_meter_daemon.py` |
 | Input handler | `/opt/roll-streamer/scripts/input_handler.py` |
-| VU service | `/etc/systemd/system/vu-meter.service` |
-| Input service | `/etc/systemd/system/input-handler.service` |
+| Init scripts | `/opt/roll-streamer/init/*.sh` |
+| Startup script | `/opt/bootlocal.sh` |
+| VU meter log | `/tmp/vu-meter-daemon.log` |
+| Input handler log | `/tmp/input-handler.log` |
 | Documentation | `/opt/roll-streamer/docs/` |
 
 ## Additional Resources
 
 - Full documentation: [README.md](README.md)
-- Installation guide: [docs/INSTALLATION.md](docs/INSTALLATION.md)
+- **PiCorePlayer installation: [docs/PICOREPLAYER_INSTALL.md](docs/PICOREPLAYER_INSTALL.md)** ⭐
+- General installation guide: [docs/INSTALLATION.md](docs/INSTALLATION.md)
 - I2C register map: [docs/hardware/I2C_Register_Map.md](docs/hardware/I2C_Register_Map.md)
 - GPIO allocation: [docs/hardware/GPIO_Allocation.md](docs/hardware/GPIO_Allocation.md)
 - Wiring diagram: [docs/hardware/Wiring_Diagram.md](docs/hardware/Wiring_Diagram.md)

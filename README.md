@@ -29,7 +29,7 @@ This project provides a sophisticated peripheral control system for a music stre
 - Python library for easy control
 - VU meter daemon with authentic ballistics
 - Input handler for buttons and encoder
-- Systemd services for automatic startup
+- PiCorePlayer/Tiny Core init scripts for automatic startup
 - Comprehensive I2C register map
 - Multiple operating modes
 
@@ -50,9 +50,11 @@ roll-streamer/
 │   ├── scripts/
 │   │   ├── vu_meter_daemon.py    # VU meter daemon
 │   │   └── input_handler.py      # Input handler
-│   └── services/                  # Systemd service files
-│       ├── vu-meter.service
-│       └── input-handler.service
+│   └── init/                      # Init scripts for PiCorePlayer
+│       ├── start-vu-meter.sh
+│       ├── start-input-handler.sh
+│       ├── stop-services.sh
+│       └── check-services.sh
 ├── docs/                       # Documentation
 │   ├── hardware/
 │   │   ├── GPIO_Allocation.md     # Pin allocation
@@ -116,28 +118,34 @@ cd firmware/
 
 ### 3. PiCorePlayer Extension Installation
 
-#### On RPi Zero 2 (PiCorePlayer)
+**Note:** PiCorePlayer uses Tiny Core Linux, not systemd. See [PiCorePlayer Installation Guide](docs/PICOREPLAYER_INSTALL.md) for complete instructions.
+
+#### Quick Install (on RPi Zero 2)
 
 ```bash
 # Install required packages
 tce-load -wi python3.6.tcz
 tce-load -wi i2c-tools.tcz
 tce-load -wi python3.6-pip.tcz
-
-# Install Python dependencies
 sudo pip3 install smbus2
 
 # Copy extension files
 sudo mkdir -p /opt/roll-streamer
 sudo cp -r picore-extension/src /opt/roll-streamer/
 sudo cp -r picore-extension/scripts /opt/roll-streamer/
+sudo cp -r picore-extension/init /opt/roll-streamer/
 sudo chmod +x /opt/roll-streamer/scripts/*.py
+sudo chmod +x /opt/roll-streamer/init/*.sh
 
-# Install systemd services
-sudo cp picore-extension/services/*.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable vu-meter.service input-handler.service
-sudo systemctl start vu-meter.service input-handler.service
+# Add to bootlocal.sh for automatic startup
+sudo vi /opt/bootlocal.sh
+# Add these lines at the end:
+#   /opt/roll-streamer/init/start-vu-meter.sh &
+#   /opt/roll-streamer/init/start-input-handler.sh &
+
+# Save changes (PiCorePlayer runs from RAM!)
+echo "/opt/roll-streamer" | sudo tee -a /opt/.filetool.lst
+sudo filetool.sh -b
 ```
 
 #### Verify Installation
@@ -147,13 +155,16 @@ sudo systemctl start vu-meter.service input-handler.service
 i2cdetect -y 1
 # Should show device at address 0x42
 
+# Start services manually
+/opt/roll-streamer/init/start-vu-meter.sh
+/opt/roll-streamer/init/start-input-handler.sh
+
 # Check service status
-sudo systemctl status vu-meter.service
-sudo systemctl status input-handler.service
+/opt/roll-streamer/init/check-services.sh
 
 # View logs
-journalctl -u vu-meter.service -f
-journalctl -u input-handler.service -f
+tail -f /tmp/vu-meter-daemon.log
+tail -f /tmp/input-handler.log
 ```
 
 ## Usage
