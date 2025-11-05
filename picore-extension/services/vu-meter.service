@@ -1,0 +1,27 @@
+[Unit]
+Description=VU Meter Daemon for RP2040 Controller
+Documentation=file:///opt/roll-streamer/README.md
+After=network.target squeezelite.service
+Wants=squeezelite.service
+
+[Service]
+Type=simple
+User=tc
+Group=staff
+WorkingDirectory=/opt/roll-streamer
+ExecStart=/usr/bin/python3 /opt/roll-streamer/scripts/vu_meter_daemon.py --pipe /tmp/vu_meter_data
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Resource limits
+MemoryLimit=100M
+CPUQuota=25%
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
