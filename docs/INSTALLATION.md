@@ -395,23 +395,27 @@ sudo git clone https://github.com/yourusername/roll-streamer.git
 sudo chmod +x /opt/roll-streamer/picore-extension/scripts/*.py
 ```
 
-### Install Systemd Services
+### Configure Automatic Startup
+
+PiCorePlayer uses Tiny Core Linux, which doesn't use systemd. Instead, we use traditional init scripts.
 
 ```bash
-# Copy service files
-sudo cp /tmp/services/*.service /etc/systemd/system/
+# Make init scripts executable
+sudo chmod +x /opt/roll-streamer/init/*.sh
 
-# Or if using git clone:
-sudo cp /opt/roll-streamer/picore-extension/services/*.service /etc/systemd/system/
+# Add services to bootlocal.sh for automatic startup
+sudo vi /opt/bootlocal.sh
 
-# Reload systemd
-sudo systemctl daemon-reload
+# Add these lines at the end of the file:
+# Start roll-streamer services
+/opt/roll-streamer/init/start-vu-meter.sh &
+/opt/roll-streamer/init/start-input-handler.sh &
 
-# Enable services
-sudo systemctl enable vu-meter.service
-sudo systemctl enable input-handler.service
+# Save and exit, then backup the changes
+sudo filetool.sh -b
 
-# Make persistent
+# Ensure roll-streamer directory persists across reboots
+echo "/opt/roll-streamer" | sudo tee -a /opt/.filetool.lst
 sudo filetool.sh -b
 ```
 
@@ -547,17 +551,19 @@ EOF
 ### Start Services
 
 ```bash
-# Start services
-sudo systemctl start vu-meter.service
-sudo systemctl start input-handler.service
+# Start services manually
+/opt/roll-streamer/init/start-vu-meter.sh
+/opt/roll-streamer/init/start-input-handler.sh
 
 # Check status
-sudo systemctl status vu-meter.service
-sudo systemctl status input-handler.service
+/opt/roll-streamer/init/check-services.sh
 
 # View logs
-journalctl -u vu-meter.service -f
-journalctl -u input-handler.service -f
+tail -f /tmp/vu-meter-daemon.log
+tail -f /tmp/input-handler.log
+
+# Stop services if needed
+/opt/roll-streamer/init/stop-services.sh
 ```
 
 ## Troubleshooting
@@ -598,27 +604,36 @@ journalctl -u input-handler.service -f
 
 ### Services Won't Start
 
-**Problem:** systemd services fail to start
+**Problem:** Init scripts fail to start services
 
 **Solutions:**
 ```bash
-# Check service status
-sudo systemctl status vu-meter.service
+# Check if services are running
+/opt/roll-streamer/init/check-services.sh
 
-# View detailed logs
-journalctl -xe
+# View logs
+tail -50 /tmp/vu-meter-daemon.log
+tail -50 /tmp/input-handler.log
 
 # Check Python dependencies
 python3 -c "import smbus2; print('OK')"
 
 # Verify file permissions
 ls -l /opt/roll-streamer/scripts/
+ls -l /opt/roll-streamer/init/
 
 # Check I2C permissions
 ls -l /dev/i2c-1
 
-# Add user to i2c group
+# Add user to i2c group if needed
 sudo adduser tc i2c
+
+# Verify init scripts are executable
+sudo chmod +x /opt/roll-streamer/init/*.sh
+
+# Try starting services manually with verbose output
+sh -x /opt/roll-streamer/init/start-vu-meter.sh
+sh -x /opt/roll-streamer/init/start-input-handler.sh
 ```
 
 ### Audio Pipe Not Found

@@ -113,7 +113,6 @@ This document summarizes the complete implementation of the PiCorePlayer Music S
 - dB to PWM scaling
 - Configurable update rate
 - Test mode for hardware verification
-- Systemd service integration
 
 #### Input Handler
 - **File:** `picore-extension/scripts/input_handler.py`
@@ -123,16 +122,7 @@ This document summarizes the complete implementation of the PiCorePlayer Music S
 - Squeezelite/LMS control integration
 - Volume control via encoder
 - Play/pause, next/previous track
-- System service integration
-
-#### Systemd Services
-- **Files:**
-  - `picore-extension/services/vu-meter.service`
-  - `picore-extension/services/input-handler.service`
-- Automatic startup on boot
-- Resource limits configured
-- Logging to systemd journal
-- Restart on failure
+- System service integration via Tiny Core init scripts
 
 ### 5. Documentation ✅
 
@@ -213,7 +203,7 @@ This document summarizes the complete implementation of the PiCorePlayer Music S
 - **Firmware Framework:** Arduino (Earlephilhower core)
 - **Control Library:** Python 3.6+
 - **Dependencies:** smbus2, i2c-tools
-- **Services:** systemd integration
+- **Services:** Tiny Core Linux init scripts
 
 ## File Structure Summary
 
@@ -234,9 +224,9 @@ roll-streamer/
 │   ├── scripts/
 │   │   ├── vu_meter_daemon.py     # VU meter daemon (350 lines)
 │   │   └── input_handler.py       # Input handler (300 lines)
-│   └── services/
-│       ├── vu-meter.service       # Systemd service
-│       └── input-handler.service  # Systemd service
+│   └── init/
+│       ├── start-vu-meter.sh      # Init script for VU meter daemon
+│       └── start-input-handler.sh # Init script for input handler
 │
 ├── docs/                           # Documentation
 │   ├── INSTALLATION.md            # Installation guide (1000+ lines)
@@ -281,10 +271,10 @@ Total: 5,200+ lines of code and documentation
 - Change detection flags
 
 ### 5. Production-Ready Software
-- Systemd service integration
-- Automatic startup and restart
-- Logging to journal
-- Resource limits configured
+- Tiny Core Linux init script integration
+- Automatic startup via bootlocal.sh
+- Process monitoring and restart
+- File-based logging
 - Secure configuration
 
 ## Testing and Validation
