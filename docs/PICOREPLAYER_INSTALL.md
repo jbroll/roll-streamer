@@ -5,8 +5,6 @@ Complete installation guide specifically for PiCorePlayer (Tiny Core Linux).
 ## Important: PiCorePlayer Differences
 
 PiCorePlayer is based on **Tiny Core Linux**, not a standard Linux distribution:
-- ❌ **NO systemd** - Uses traditional init scripts
-- ❌ **NO systemctl** - Use custom startup scripts
 - ✅ **Uses /opt/bootlocal.sh** for startup
 - ✅ **Uses filetool.sh -b** to persist changes
 - ✅ **Runs from RAM** - changes need to be saved to persist

@@ -397,8 +397,6 @@ sudo chmod +x /opt/roll-streamer/picore-extension/scripts/*.py
 
 ### Configure Automatic Startup
 
-PiCorePlayer uses Tiny Core Linux, which doesn't use systemd. Instead, we use traditional init scripts.
-
 ```bash
 # Make init scripts executable
 sudo chmod +x /opt/roll-streamer/init/*.sh

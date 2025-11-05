@@ -118,7 +118,7 @@ cd firmware/
 
 ### 3. PiCorePlayer Extension Installation
 
-**Note:** PiCorePlayer uses Tiny Core Linux, not systemd. See [PiCorePlayer Installation Guide](docs/PICOREPLAYER_INSTALL.md) for complete instructions.
+See [PiCorePlayer Installation Guide](docs/PICOREPLAYER_INSTALL.md) for complete instructions.
 
 #### Quick Install (on RPi Zero 2)
 
